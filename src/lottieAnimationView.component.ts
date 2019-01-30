@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output, EventEmitter, ViewChild, ElementRef, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Inject, Input, OnInit, Output, PLATFORM_ID, ViewChild } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 
 declare let require: any;
@@ -6,20 +6,30 @@ const lottie: any = require('lottie-web/build/player/lottie.js');
 
 @Component({
     selector: 'lottie-animation-view',
-    template: `<div #lavContainer 
-                    [ngStyle]="{'width': viewWidth, 'height': viewHeight, 'overflow':'hidden', 'margin': '0 auto'}">    
-               </div>`
+    template: `
+        <div #lavContainer
+             [ngStyle]="{'width': viewWidth, 'height': viewHeight, 'overflow':'hidden', 'margin': '0 auto'}">
+        </div>`
 })
 
 export class LottieAnimationViewComponent implements OnInit {
-    
-    constructor(@Inject(PLATFORM_ID) private platformId: string) {}
 
     @Input() options: any;
     @Input() width: number;
     @Input() height: number;
 
+
     @Output() animCreated: any = new EventEmitter();
+
+    // Other event types
+    // onComplete
+    // onLoopComplete
+    // onEnterFrame
+    // onSegmentStart (TBD)
+    @Output() onComplete: any = new EventEmitter();
+    @Output() onLoopComplete: any = new EventEmitter();
+    @Output() onEnterFrame: any = new EventEmitter();
+
 
     @ViewChild('lavContainer') lavContainer: ElementRef;
 
@@ -27,10 +37,15 @@ export class LottieAnimationViewComponent implements OnInit {
     public viewHeight: string;
     private _options: any;
 
+    constructor(@Inject(PLATFORM_ID) private platformId: string) {
+    }
+
     ngOnInit() {
-        
-        if(isPlatformServer(this.platformId)){return;}
-        
+
+        if (isPlatformServer(this.platformId)) {
+            return;
+        }
+
         this._options = {
             container: this.lavContainer.nativeElement,
             renderer: this.options.renderer || 'svg',
@@ -46,8 +61,27 @@ export class LottieAnimationViewComponent implements OnInit {
         this.viewHeight = this.height + 'px' || '100%';
         // DONE: Safari BUG
         lottie.setLocationHref(document.location.href);
-        
+
         let anim: any = lottie.loadAnimation(this._options);
         this.animCreated.emit(anim);
+
+        // addListener
+        anim.addEventListener('complete', this.emitComplete(anim));
+        anim.addEventListener('loopComplete', this.emitComplete(anim));
+        anim.addEventListener('enterFrame', this.emitComplete(anim));
+
     }
+
+    emitComplete(anim: any) {
+        this.onComplete.emit(anim);
+    }
+
+    emitLoopComplete(anim: any) {
+        this.onLoopComplete.emit(anim);
+    }
+
+    emitEnterFrame(anim: any) {
+        this.onEnterFrame.emit(anim);
+    }
+
 }

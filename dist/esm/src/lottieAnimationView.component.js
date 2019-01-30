@@ -1,10 +1,18 @@
-import { Component, Input, Output, EventEmitter, ViewChild, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, Output, PLATFORM_ID, ViewChild } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 var lottie = require('lottie-web/build/player/lottie.js');
 var LottieAnimationViewComponent = (function () {
     function LottieAnimationViewComponent(platformId) {
         this.platformId = platformId;
         this.animCreated = new EventEmitter();
+        // Other event types
+        // onComplete
+        // onLoopComplete
+        // onEnterFrame
+        // onSegmentStart (TBD)
+        this.onComplete = new EventEmitter();
+        this.onLoopComplete = new EventEmitter();
+        this.onEnterFrame = new EventEmitter();
     }
     LottieAnimationViewComponent.prototype.ngOnInit = function () {
         if (isPlatformServer(this.platformId)) {
@@ -26,6 +34,19 @@ var LottieAnimationViewComponent = (function () {
         lottie.setLocationHref(document.location.href);
         var anim = lottie.loadAnimation(this._options);
         this.animCreated.emit(anim);
+        // addListener
+        anim.addEventListener('complete', this.emitComplete(anim));
+        anim.addEventListener('loopComplete', this.emitComplete(anim));
+        anim.addEventListener('enterFrame', this.emitComplete(anim));
+    };
+    LottieAnimationViewComponent.prototype.emitComplete = function (anim) {
+        this.onComplete.emit(anim);
+    };
+    LottieAnimationViewComponent.prototype.emitLoopComplete = function (anim) {
+        this.onLoopComplete.emit(anim);
+    };
+    LottieAnimationViewComponent.prototype.emitEnterFrame = function (anim) {
+        this.onEnterFrame.emit(anim);
     };
     return LottieAnimationViewComponent;
 }());
@@ -33,7 +54,7 @@ export { LottieAnimationViewComponent };
 LottieAnimationViewComponent.decorators = [
     { type: Component, args: [{
                 selector: 'lottie-animation-view',
-                template: "<div #lavContainer \n                    [ngStyle]=\"{'width': viewWidth, 'height': viewHeight, 'overflow':'hidden', 'margin': '0 auto'}\">    \n               </div>"
+                template: "\n        <div #lavContainer\n             [ngStyle]=\"{'width': viewWidth, 'height': viewHeight, 'overflow':'hidden', 'margin': '0 auto'}\">\n        </div>"
             },] },
 ];
 /** @nocollapse */
@@ -45,6 +66,9 @@ LottieAnimationViewComponent.propDecorators = {
     'width': [{ type: Input },],
     'height': [{ type: Input },],
     'animCreated': [{ type: Output },],
+    'onComplete': [{ type: Output },],
+    'onLoopComplete': [{ type: Output },],
+    'onEnterFrame': [{ type: Output },],
     'lavContainer': [{ type: ViewChild, args: ['lavContainer',] },],
 };
 //# sourceMappingURL=lottieAnimationView.component.js.map
