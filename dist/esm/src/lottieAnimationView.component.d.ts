@@ -14,7 +14,7 @@ export declare class LottieAnimationViewComponent implements OnInit {
     private _options;
     constructor(platformId: string);
     ngOnInit(): void;
-    emitComplete(anim: any): void;
-    emitLoopComplete(anim: any): void;
-    emitEnterFrame(anim: any): void;
+    private emitComplete(anim);
+    private emitLoopComplete(anim);
+    private emitEnterFrame(anim);
 }

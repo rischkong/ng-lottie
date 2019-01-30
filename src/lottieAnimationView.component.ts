@@ -72,15 +72,15 @@ export class LottieAnimationViewComponent implements OnInit {
 
     }
 
-    emitComplete(anim: any) {
+    private emitComplete(anim: any) {
         this.onComplete.emit(anim);
     }
 
-    emitLoopComplete(anim: any) {
+    private emitLoopComplete(anim: any) {
         this.onLoopComplete.emit(anim);
     }
 
-    emitEnterFrame(anim: any) {
+    private emitEnterFrame(anim: any) {
         this.onEnterFrame.emit(anim);
     }
 
